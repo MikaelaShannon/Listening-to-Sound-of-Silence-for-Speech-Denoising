@@ -9,7 +9,7 @@ from itertools import groupby
 import numpy as np
 
 
-PROJECT_ROOT = "../"
+PROJECT_ROOT = "/home/mikaelaashannon/Listening-to-Sound-of-Silence-for-Speech-Denoising/"
 DATA_ROOT = os.path.join(os.path.abspath(PROJECT_ROOT), "data")
 JSON_DUMP_PARAMS = dict(indent=4, sort_keys=False, ensure_ascii=False, separators=(',', ':'))
 VIDEO_EXT = '.mp4'

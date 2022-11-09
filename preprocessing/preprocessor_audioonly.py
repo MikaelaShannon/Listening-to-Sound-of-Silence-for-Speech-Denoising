@@ -168,10 +168,10 @@ def build_csv(download_dataset_dir, output_csv, ext=AUDIO_EXT):
 
 
 if __name__ == "__main__":
-    # SOS_DIR = os.path.join(DATA_ROOT, 'sounds_of_silence_audioonly')
-    # SOS_CSV = os.path.join(SOS_DIR, 'sounds_of_silence.csv')
-    # SOS_JSON = os.path.join(DATA_ROOT, 'sounds_of_silence.json')
-    # build_json_better(SOS_DIR, SOS_CSV, SOS_JSON)
+    SOS_DIR = os.path.join(DATA_ROOT, 'sounds_of_silence_audioonly_original')
+    SOS_CSV = os.path.join(SOS_DIR, 'sounds_of_silence.csv')
+    SOS_JSON = os.path.join(DATA_ROOT, 'sounds_of_silence.json')
+    build_json_better(SOS_DIR, SOS_CSV, SOS_JSON)
 
     # DIR = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy'
     # CSV = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy/TEST_noisy.csv'
@@ -179,10 +179,10 @@ if __name__ == "__main__":
     # JSON = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy.json'
     # build_json_better(DIR, CSV, JSON, ext='.WAV')
 
-    SNR = [-10, -7, -3, 0, 3, 7, 10]
-    for snr in tqdm(SNR):
-        DIR = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr' + str(int(snr))
-        CSV = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr' + str(int(snr)) + '/TEST_noisy_snr' + str(int(snr)) + '.csv'
-        build_csv(DIR, CSV, ext='.WAV')
-        JSON = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr' + str(int(snr)) + '.json'
-        build_json_better(DIR, CSV, JSON, ext='.WAV')
+    # SNR = [-10, -7, -3, 0, 3, 7, 10]
+    # for snr in tqdm(SNR):
+    #     DIR = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr' + str(int(snr))
+    #     CSV = '/proj/vondrick/rx2132/test_noise_robust_emsbedding/data/TIMIT/TEST_noisy_snr' + str(int(snr)) + '/TEST_noisy_snr' + str(int(snr)) + '.csv'
+    #     build_csv(DIR, CSV, ext='.WAV')
+    #     JSON = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr' + str(int(snr)) + '.json'
+    #     build_json_better(DIR, CSV, JSON, ext='.WAV')

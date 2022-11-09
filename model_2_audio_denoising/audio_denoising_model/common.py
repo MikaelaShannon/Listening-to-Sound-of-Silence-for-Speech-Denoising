@@ -6,9 +6,9 @@ import torch
 import utils
 
 
-PROJECT_ROOT = "../"
+PROJECT_ROOT = "/home/mikaelaashannon/Listening-to-Sound-of-Silence-for-Speech-Denoising"
 OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "model_output")
-EXPERIMENT_NAME = os.path.basename(os.getcwd())
+EXPERIMENT_NAME = "audiodenoising_model"
 EXPERIMENT_DIR = os.path.join(OUTPUT_ROOT, EXPERIMENT_NAME)
 PHASE_TRAINING = 'training'
 PHASE_TESTING = 'testing'
@@ -18,7 +18,7 @@ PHASE_PREDICTION = 'pred'
 def get_config(args):
     config = MyConfig()
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_ids)
-    config.device = torch.device("cuda:{}".format(args.gpu_ids))
+    config.device = torch.device("cpu")
     return config
 
 

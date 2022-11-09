@@ -8,7 +8,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from pypesq import pesq
+from pesq import pesq
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
@@ -32,10 +32,10 @@ BIT_STREAM_LABEL = 'recovered_prediction'
 GT_BIT_STREAM_LABEL = 'bit_stream'
 
 FIRST_MODEL_EXP_NAME = 'audioonly_model'
-FIRST_MODEL_OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "../model_1_silent_interval_detection/model_output", FIRST_MODEL_EXP_NAME, "outputs")
+FIRST_MODEL_OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "./model_output", FIRST_MODEL_EXP_NAME, "outputs")
 
-# UNKNOWN_CLEAN_SIGNAL_NAME = 'sounds_of_silence'
-UNKNOWN_CLEAN_SIGNAL_NAME = 'TEST_noisy_snr10'
+UNKNOWN_CLEAN_SIGNAL_NAME = 'sounds_of_silence'
+# UNKNOWN_CLEAN_SIGNAL_NAME = 'TEST_noisy_snr10'
 UNKNOWN_CLEAN_SIGNAL_FIRST_MODEL_OUTPUT_ROOT = os.path.join(FIRST_MODEL_OUTPUT_ROOT, UNKNOWN_CLEAN_SIGNAL_NAME)
 
 EXPERIMENT_PREDICTION_OUTPUT_DIR = os.path.join(EXPERIMENT_DIR, 'outputs', FIRST_MODEL_EXP_NAME)
@@ -160,16 +160,16 @@ def run(args, data_list, save_results=True, save_stat=False):
     name = args.ckpt if args.ckpt == 'latest' else "ckpt_epoch{}".format(args.ckpt)
     load_path = os.path.join("train_log/model", "{}.pth".format(name))
     net.load_state_dict(torch.load(load_path)['model_state_dict'])
-    net = net.cuda()
+    net = net.cpu()
 
     stat = []
 
     # forward
     net.eval()
     for data in tqdm(data_list):
-        mixed_stft = data['mixed'].cuda()
-        noise_stft = data['noise'].cuda()
-        clean_stft = data['clean'].cuda()  # (B, 2, 257, L)
+        mixed_stft = data['mixed'].cpu()
+        noise_stft = data['noise'].cpu()
+        clean_stft = data['clean'].cpu()  # (B, 2, 257, L)
         full_noise_stft = data['full_noise'].numpy()[0].transpose((1, 2, 0))
         with torch.no_grad():
             pred_noise_stft, output_mask = net(mixed_stft, noise_stft)
@@ -387,14 +387,17 @@ def evaluate(args, data_list_info, save_individual_results=True, save_stat=True)
     name = args.ckpt if args.ckpt == 'latest' or args.ckpt == 'best_acc' else "ckpt_epoch{}".format(args.ckpt)
     load_path = os.path.join(config.model_dir, "{}.pth".format(name))
     print('Load saved model: {}'.format(load_path))
-    net.load_state_dict(torch.load(load_path)['model_state_dict'])
+    net.load_state_dict(torch.load(load_path, map_location=torch.device('cpu'))['model_state_dict'])
 
     if torch.cuda.device_count() > 1:
         print('Multi-GPUs available')
         net = nn.DataParallel(net.cuda())   # For multi-GPU
-    else:
+    elif torch.cuda.device_count()==1:
         print('Single-GPU available')
         net = net.cuda()    # For single-GPU
+    else:
+        print('CPU')
+        net = net.cpu()
 
     # evaluate
     net.eval()
@@ -403,10 +406,10 @@ def evaluate(args, data_list_info, save_individual_results=True, save_stat=True)
     print('Save overall results:', save_stat)
 
     for i, data in enumerate(tqdm(data_list)):
-        mixed_stft = data['mixed'].cuda()
-        noise_stft = data['noise'].cuda()
+        mixed_stft = data['mixed'].cpu()
+        noise_stft = data['noise'].cpu()
         if not args.unknown_clean_signal:
-            clean_stft = data['clean'].cuda()  # (B, 2, 257, L)
+            clean_stft = data['clean'].cpu()  # (B, 2, 257, L)
             full_noise_stft = data['full_noise'].numpy()[0].transpose((1, 2, 0))
         with torch.no_grad():
             pred_noise_stft, output_mask = net(mixed_stft, noise_stft)

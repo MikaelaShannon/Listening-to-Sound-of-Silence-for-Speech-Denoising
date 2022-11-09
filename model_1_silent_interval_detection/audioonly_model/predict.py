@@ -30,9 +30,9 @@ from utils import ensure_dir, get_parent_dir
 SIGMOID_THRESHOLD = 0.5
 EXPERIMENT_PREDICTION_OUTPUT_DIR = os.path.join(EXPERIMENT_DIR, 'outputs')
 
-SOUND_OF_SILENCE_JSON = os.path.join(DATA_ROOT, 'sounds_of_silence.json')
-TIMIT_JSON = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr10.json'
-EXTERNAL_DATASET_JSON = TIMIT_JSON
+SOUND_OF_SILENCE_JSON = '/home/mikaelaashannon/Listening-to-Sound-of-Silence-for-Speech-Denoising/data/sounds_of_silence.json' #os.path.join(DATA_ROOT, 'sounds_of_silence.json')
+# TIMIT_JSON = '/proj/vondrick/rx2132/test_noise_robust_embedding/data/TIMIT/TEST_noisy_snr10.json'
+EXTERNAL_DATASET_JSON = SOUND_OF_SILENCE_JSON
 
 
 def evaluate(args, save_individual_results=True, save_noise_info=True, save_stat=True, dataset_json=None, clean_audio=True):
@@ -53,14 +53,17 @@ def evaluate(args, save_individual_results=True, save_noise_info=True, save_stat
     name = args.ckpt if args.ckpt == 'latest' or args.ckpt == 'best_acc' else "ckpt_epoch{}".format(args.ckpt)
     load_path = os.path.join(config.model_dir, "{}.pth".format(name))
     print('Load saved model: {}'.format(load_path))
-    net.load_state_dict(torch.load(load_path)['model_state_dict'])
+    net.load_state_dict(torch.load(load_path, map_location=torch.device('cpu'))['model_state_dict'])
 
     if torch.cuda.device_count() > 1:
         print('For multi-GPU')
         net = nn.DataParallel(net.cuda())   # For multi-GPU
-    else:
+    elif torch.cuda.device_count()==1:
         print('For single-GPU')
         net = net.cuda()    # For single-GPU
+    else:
+        print('For CPU')
+        net = net.cpu()
 
     # evaluate
     net.eval()
@@ -109,11 +112,12 @@ def evaluate(args, save_individual_results=True, save_noise_info=True, save_stat
         # batch_frames_raws = data['frames'].detach().cpu()
         batch_labels = data['label'].detach().cpu().numpy()
         # print('batch_labels.shape:', batch_labels.shape)
-        batch_audios = data['audio'].cuda()
+        batch_audios = data['audio'].cpu()
         batch_audio_raws = data['audio'].detach().cpu().numpy()
         # print('batch_audio_raws.shape:', batch_audio_raws.shape)
 
         with torch.no_grad():
+            breakpoint()
             batch_output_values = torch.sigmoid(net(s=batch_audios, v_num_frames=batch_labels.shape[1])).detach().cpu().numpy()
             # print('batch_output_values.shape:', batch_output_values.shape)
             batch_pred_labels = (batch_output_values >= SIGMOID_THRESHOLD).astype(np.float)
@@ -304,7 +308,7 @@ def run(args, data_list, save_results=True, save_stat=False, is_ids=False):
     load_path = os.path.join(config.model_dir, "{}.pth".format(name))
     print('Load saved model: {}'.format(load_path))
     net.load_state_dict(torch.load(load_path)['model_state_dict'])
-    net = net.cuda()
+    net = net.cpu()
 
     stat = []
 
@@ -318,7 +322,7 @@ def run(args, data_list, save_results=True, save_stat=False, is_ids=False):
             data = get_data_by_id(data)
         frames = data['frames']
         label = data['label']
-        audio = data['audio'].cuda()
+        audio = data['audio'].cpu()
         audio_raw = data['audio_raw']
 
         with torch.no_grad():

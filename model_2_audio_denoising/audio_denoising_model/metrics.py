@@ -8,7 +8,7 @@ from subprocess import run, PIPE
 from scipy.io import wavfile
 from scipy.interpolate import interp1d
 from scipy.linalg import toeplitz
-from pypesq import pesq
+from pesq import pesq
 from pystoi.stoi import stoi
 from itertools import groupby
 
